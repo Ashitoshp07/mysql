@@ -7,9 +7,9 @@ const User = {
         return rows;
     },
 
-    createUser: async (user_name, user_contact, profile_url, dob) => {
-        const query = 'INSERT INTO user (user_name, user_contact, profile_url, dob) VALUES (?, ?, ?, ?)';
-        const [result] = await db.execute(query, [user_name, user_contact, profile_url, dob]);
+    createUser: async (user_name, user_contact, user_profile_url, user_dob) => {
+        const query = 'INSERT INTO user (user_name, user_contact, user_profile_url, user_dob) VALUES (?, ?, ?, ?)';
+        const [result] = await db.execute(query, [user_name, user_contact, user_profile_url, user_dob]);
         return result.insertId; // Return the inserted user's ID
     },
 
@@ -17,6 +17,12 @@ const User = {
         const query = 'SELECT * FROM user WHERE u_id = ?';
         const [rows] = await db.execute(query, [userId]);
         return rows[0]; // Return the first row (user)
+    },
+
+    updateUser: async (userId, user_name, user_contact, user_profile_url, user_dob) => {
+        const query = 'UPDATE user SET user_name = ?, user_contact = ?, user_profile_url = ?, user_dob = ? WHERE u_id = ?';
+        const [result] = await db.execute(query, [user_name, user_contact, user_profile_url, user_dob, userId]);
+        return result.affectedRows; // Return the number of affected rows
     },
 
     deleteUser: async (userId) => {

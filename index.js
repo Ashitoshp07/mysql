@@ -4,7 +4,8 @@ const userRoutes = require('./routes/userRoutes');
 const multer = require('multer');
 const path = require('path');
 
-const upload = multer({ dest: 'upload/' });
+const upload = multer({ dest: 'upload/user_profile/' });
+multer({ dest: 'upload/group_profile/' });
 
 
 dotenv.config();
@@ -16,6 +17,7 @@ app.use('/upload', express.static(path.join(__dirname, 'upload')));
 
 // Routes
 app.use('/api', userRoutes);
+app.use('/api', require('./routes/groupRoutes'));
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
