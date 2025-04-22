@@ -1,6 +1,7 @@
 const path = require('path')
 const fs = require('fs');
 const Groups = require('../models/groupModel');
+const ApiResponse = require('../config/response/apiresponse'); 
 
 const BaseURL = 'http://localhost:5000';
 
@@ -23,8 +24,9 @@ exports.creategroup = async (req, res) => {
 
         return res.status(201).json({
             message: "Group  created successfully",
-            group_id,
             group_profile_url,
+            group_name
+    
             // token,
         });
 
@@ -36,10 +38,10 @@ exports.creategroup = async (req, res) => {
 
 
 
-exports.getGroupById = async (req, res) => {
+exports.getGroupByUser = async (req, res) => {
     try {
-        const groupId = req.params.id;
-        const groups = await Groups.getGroupById(groupId);
+        const userName = req.params.user_name;
+        const groups = await Groups.getGroupByUserName(userName);
         if (!groups) {
             return res.status(404).json({ error: "User not found" });
         }
@@ -50,6 +52,75 @@ exports.getGroupById = async (req, res) => {
         res.status(500).json({ error: "Internal Server Error", details: err.message });
     }
 }
+
+
+exports.getGroupById = async (req, res) => {
+    try {
+        const groupName = req.params.group_name;
+        const groups = await Groups.getGroupById(groupName);
+        if (!groups) {
+            return res.status(404).json({ error: "User not found" });
+        }
+        res.json(groups);
+    }
+    catch (err) {
+        console.error("Error in getGroupById:", err);
+        res.status(500).json({ error: "Internal Server Error", details: err.message });
+    }
+}
+
+exports.getGroupMember = async (req, res) => {
+    try {
+        const groupName = req.params.group_name;
+        const groups = await Groups.getGroupMember(groupName);
+        if (!groups) {
+            return res.status(404).json({ error: "User not found" });
+        }
+        res.json(groups);
+    }
+    catch (err) {
+        console.error("Error in getGroupById:", err);
+        res.status(500).json({ error: "Internal Server Error", details: err.message });
+    }
+}
+
+exports.allocateMembers = async (req, res) => {
+    try {
+        const { group_name, user_contacts } = req.body;
+
+        if (!group_name || !user_contacts || !Array.isArray(user_contacts) || user_contacts.length === 0) {
+            return res.status(400).json({ error: "Missing or invalid group_name or user_contacts" });
+        }
+
+        await Groups.allocateMember(group_name, user_contacts);
+
+        const userInfo = await Groups.getAllocatedUserInfo(group_name, user_contacts);
+
+        res.status(200).json({ message: "Users allocated successfully", users: userInfo });
+    } catch (err) {
+        console.error("Error in allocating members:", err);
+        res.status(500).json({ error: "Internal Server Error", details: err.message });
+    }
+};
+
+
+exports.deallocateMembers = async (req, res) => {
+    try {
+        const { group_name, user_contacts } = req.body; 
+
+        if (!group_name || !user_contacts || user_contacts.length === 0) {
+            return res.status(400).json({ error: "Missing group_name or user_names" });
+        }
+
+        const result = await Groups.deallocateMember(group_name, user_contacts);
+        res.json(result);
+    } catch (err) {
+        console.error("Error in deallocating members:", err);
+        res.status(500).json({ error: "Internal Server Error", details: err.message });
+    }
+};
+
+
 
 exports.updateGroup = async (req, res) => {
     try {

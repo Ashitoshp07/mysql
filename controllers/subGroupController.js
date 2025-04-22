@@ -11,7 +11,7 @@ const BaseURL = 'http://localhost:5000';
 
 exports.createsubGroup = async (req, res) => {
     try {
-        const { subgroup_name, group_name, group_id, u_id } = req.body;
+        const { subgroup_name, group_name, group_id, user_name } = req.body;
         let subgroup_profile_url = null;
 
         if (req.file) {
@@ -20,7 +20,7 @@ exports.createsubGroup = async (req, res) => {
         }
 
         // Correct order of parameters
-        const subgroup_id = await sub_group.createsubGroup(subgroup_name, subgroup_profile_url, group_name, group_id, u_id);
+        const subgroup_id = await sub_group.createsubGroup(subgroup_name, subgroup_profile_url, group_name, group_id, user_name);
 
         // const token = jwt.sign({ id: userId }, process.env.JWT_SECRET, { expiresIn: "1h" });
 
@@ -28,6 +28,7 @@ exports.createsubGroup = async (req, res) => {
             message: "subGroup  created successfully",
             subgroup_id,
             subgroup_profile_url,
+            group_name
             // token,
         });
 
@@ -37,6 +38,23 @@ exports.createsubGroup = async (req, res) => {
     }
 };
 
+
+exports.getSubGroupMember = async (req, res) => {
+    try {
+        const group_name = req.params.group_name;
+        const subgroup_name = req.params.subgroup_name;
+
+        const sub_Group = await sub_group.getSubGroupMember(group_name,subgroup_name);
+        if (!sub_Group) {
+            return res.status(404).json({ error: "User not found" });
+        }
+        res.json(sub_Group);
+    }
+    catch (err) {
+        console.error("Error in getsubGroupById:", err);
+        res.status(500).json({ error: "Internal Server Error", details: err.message });
+    }
+}
 
 
 exports.getsubGroupById = async (req, res) => {
@@ -53,6 +71,27 @@ exports.getsubGroupById = async (req, res) => {
         res.status(500).json({ error: "Internal Server Error", details: err.message });
     }
 }
+
+exports.getsubGroupByGroup = async (req, res) => {
+    try {
+        const { group_name, user_name } = req.query;
+
+ if (!group_name || !user_name) {
+        return res.status(400).json({ error: "Missing group_name or user_name in query" });
+    }
+    
+    const sub_Groups = await sub_group.getsubGroupByGroup(group_name,user_name);
+        if (!sub_Groups) {
+            return res.status(404).json({ error: "User not found" });
+        }
+        res.json(sub_Groups);
+    }
+    catch (err) {
+        console.error("Error in getsubGroupById:", err);
+        res.status(500).json({ error: "Internal Server Error", details: err.message });
+    }
+}
+
 
 
 // exports.updatesubGroup = async (req, res) => {
