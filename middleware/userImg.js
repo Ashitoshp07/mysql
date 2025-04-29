@@ -56,7 +56,10 @@ const storage = multer.diskStorage({
             Folder = './upload/user_profile/';
         } else if (file.fieldname === 'group_profile_url') {
             Folder = './upload/group_profile/';
-        } else {
+        } else if (file.fieldname === 'subgroup_profile_url') {
+            Folder = './upload/sub_group_profile/';
+        }
+        else {
             return cb(new Error('Invalid field name'), false);
         }
         cb(null, Folder);
